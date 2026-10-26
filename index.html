@@ -1,4 +1,3 @@
-
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -103,6 +102,12 @@
   .history { margin-top: 8px; }
   .hist-item { display: flex; justify-content: space-between; padding: 9px 0; font-size: 14px; border-bottom: 1px solid #edf3f0; }
 
+  @media print {
+    body > header, .wrap > .card:not(.print-me), footer { display: none !important; }
+    body { background: #fff; }
+    .card { box-shadow: none; border: 1px solid #ccc; }
+  }
+
   footer { text-align: center; font-size: 12px; color: var(--muted); margin-top: 22px; }
 </style>
 </head>
@@ -144,6 +149,7 @@
   <div class="card">
     <div class="cal-title" style="text-align:center;margin-bottom:4px">Historique</div>
     <div class="history" id="history"></div>
+    <button class="ghost" id="pdfBtn">📄 Exporter en PDF (année)</button>
     <button class="ghost" id="resetBtn">Réinitialiser l'année</button>
   </div>
 
@@ -232,12 +238,54 @@ document.getElementById('resetBtn').onclick = () => {
 document.getElementById('prevMonth').onclick = () => { calDate.setMonth(calDate.getMonth() - 1); renderCal(); };
 document.getElementById('nextMonth').onclick = () => { calDate.setMonth(calDate.getMonth() + 1); renderCal(); };
 
+document.getElementById('pdfBtn').onclick = () => {
+  const now = new Date();
+  const goal = 365 * DAILY;
+  const t = total();
+  let months = '';
+  for (let m = 0; m < 12; m++) {
+    let count = 0;
+    days.forEach(d => {
+      const dt = new Date(d + 'T12:00');
+      if (dt.getFullYear() === YEAR && dt.getMonth() === m) count++;
+    });
+    if (count > 0) {
+      months += `<tr><td>${new Date(YEAR, m, 1).toLocaleDateString('fr-FR', { month: 'long' })}</td><td>${count} jours</td><td style="text-align:right">${fmt(count * DAILY)}</td></tr>`;
+    }
+  }
+  if (!months) months = '<tr><td colspan="3" style="text-align:center">Aucun jour validé pour le moment.</td></tr>';
+  const w = window.open('', '_blank');
+  w.document.write(`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Épargne ${YEAR}</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #2f4a41; padding: 24px; }
+    h1 { color: #4e8a74; font-size: 22px; }
+    h2 { color: #4e8a74; font-size: 16px; margin-top: 22px; }
+    .big { font-size: 34px; font-weight: bold; color: #4e8a74; margin: 10px 0; }
+    .muted { color: #6b857c; font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    td, th { padding: 7px 4px; border-bottom: 1px solid #dde7e2; font-size: 14px; text-align: left; }
+    th { color: #4e8a74; }
+    .right { text-align: right; }
+  </style></head><body>
+  <h1>🌿 Épargne 3 € / jour — ${YEAR}</h1>
+  <p class="muted">Récapitulatif généré le ${now.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+  <div class="big">${fmt(t)}</div>
+  <p class="muted">${days.size} jour(s) validé(s) — objectif annuel : ${fmt(goal)}</p>
+  <h2>Détail par mois</h2>
+  <table><tr><th>Mois</th><th>Jours validés</th><th class="right">Montant</th></tr>${months}
+  <tr><th>Total ${YEAR}</th><th>${days.size} jours</th><th class="right">${fmt(t)}</th></tr></table>
+  <h2>Objectif</h2>
+  <p class="muted">3 € × 365 jours = ${fmt(goal)} à la fin de l'année.<br>Reste à mettre de côté : ${fmt(Math.max(0, goal - t))}.</p>
+  </body></html>`);
+  w.document.close();
+  setTimeout(() => { w.focus(); w.print(); }, 300);
+};
+
 render();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
 </body>
 </html>
-
 
 
 
