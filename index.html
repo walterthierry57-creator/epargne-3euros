@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -91,152 +91,16 @@
 
   .cal-head {
     display: flex; justify-content: space-between; align-items: center;
-    margin-top: 12px;
-  }
-  .cal-head button {
-    width: auto; margin: 0; padding: 8px 20px;
-    background: var(--sand); color: var(--text);
-    border-radius: 10px; font-size: 20px; font-weight: 700;
-  }
-  .cal-title { font-size: 15px; font-weight: 600; }
+    margin-top: 12px
+Bloquez l'accès non désiré au microphone
+Choisissez quels sites peuvent utiliser votre micro
+×
+ANNONCE
+Installer un antivirus
 
-  .history { margin-top: 8px; }
-  .hist-item { display: flex; justify-content: space-between; padding: 9px 0; font-size: 14px; border-bottom: 1px solid #edf3f0; }
+!
 
-  footer { text-align: center; font-size: 12px; color: var(--muted); margin-top: 22px; }
-</style>
-</head>
-<body>
-<header>
-  <h1>🌿 Épargne 3 € / jour</h1>
-  <p>3 € chaque jour, toute l'année</p>
-</header>
 
-<div class="wrap">
-
-  <div class="card">
-    <div class="total-label">Total mis de côté cette année</div>
-    <div class="total" id="total">0,00 €</div>
-    <div class="sub" id="objective"></div>
-    <div class="progress"><div id="bar"></div></div>
-  </div>
-
-  <div class="card">
-    <div class="row"><span class="k">Jours validés</span><span class="v" id="daysCount">0</span></div>
-    <div class="row"><span class="k">Objectif annuel (365 j)</span><span class="v">1 095 €</span></div>
-    <div class="row"><span class="k">Reste à mettre de côté</span><span class="v" id="remain">1 095 €</span></div>
-    <div class="row"><span class="k">Cette semaine</span><span class="v" id="week">0 €</span></div>
-    <button id="addBtn">+ J'ai mis mes 3 € de côté aujourd'hui</button>
-    <button class="ghost" id="undoBtn">Annuler le dernier jour</button>
-  </div>
-
-  <div class="card">
-    <div class="cal-title" style="text-align:center;margin-bottom:6px">Calendrier</div>
-    <div class="cal-head">
-      <button id="prevMonth">◀</button>
-      <span class="cal-title" id="monthLabel"></span>
-      <button id="nextMonth">▶</button>
-    </div>
-    <div class="days" id="dow"></div>
-    <div class="days" id="calendar"></div>
-  </div>
-
-  <div class="card">
-    <div class="cal-title" style="text-align:center;margin-bottom:4px">Historique</div>
-    <div class="history" id="history"></div>
-    <button class="ghost" id="resetBtn">Réinitialiser l'année</button>
-  </div>
-
-  <footer>Données enregistrées sur ton téléphone — fonctionne hors ligne</footer>
-</div>
-
-<script>
-const DAILY = 3;
-const YEAR = new Date().getFullYear();
-const KEY = 'epargne-' + YEAR;
-let days = new Set(JSON.parse(localStorage.getItem(KEY) || '[]'));
-let calDate = new Date();
-
-const fmt = n => n.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €';
-const iso = d => d.toISOString().slice(0, 10);
-const today = iso(new Date());
-
-function save() {
-  localStorage.setItem(KEY, JSON.stringify([...days]));
-}
-function total() { return days.size * DAILY; }
-
-function render() {
-  const t = total();
-  document.getElementById('total').textContent = fmt(t);
-  document.getElementById('daysCount').textContent = days.size;
-  const goal = 365 * DAILY;
-  document.getElementById('remain').textContent = fmt(Math.max(0, goal - t));
-  const pct = Math.min(100, (t / goal * 100)).toFixed(1);
-  document.getElementById('objective').textContent = pct + ' % de l\'objectif annuel';
-  document.getElementById('bar').style.width = pct + '%';
-
-  const now = new Date();
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
-  let weekSum = 0;
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(monday); d.setDate(monday.getDate() + i);
-    if (days.has(iso(d))) weekSum += DAILY;
-  }
-  document.getElementById('week').textContent = fmt(weekSum);
-  document.getElementById('addBtn').disabled = days.has(today);
-  document.getElementById('addBtn').textContent = days.has(today)
-    ? '✓ Jour déjà validé — à toi demain !'
-    : "+ J'ai mis mes 3 € de côté aujourd'hui";
-  renderCal();
-  renderHistory();
-}
-
-function renderCal() {
-  const y = calDate.getFullYear(), m = calDate.getMonth();
-  document.getElementById('monthLabel').textContent =
-    calDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
-  const dowEl = document.getElementById('dow');
-  dowEl.innerHTML = ['L', 'M', 'M', 'J', 'V', 'S', 'D'].map(d => `<div class="day">${d}</div>`).join('');
-  const first = new Date(y, m, 1);
-  const offset = (first.getDay() + 6) % 7;
-  const nb = new Date(y, m + 1, 0).getDate();
-  let html = '';
-  for (let i = 0; i < offset; i++) html += '<div></div>';
-  for (let d = 1; d <= nb; d++) {
-    const ds = iso(new Date(y, m, d));
-    const cls = ['day'];
-    if (days.has(ds)) cls.push('done');
-    if (ds === today) cls.push('today');
-    html += `<div class="${cls.join(' ')}">${d}</div>`;
-  }
-  document.getElementById('calendar').innerHTML = html;
-}
-
-function renderHistory() {
-  const list = [...days].sort().reverse().slice(0, 15);
-  document.getElementById('history').innerHTML = list.length
-    ? list.map(d => `<div class="hist-item"><span>${new Date(d + 'T12:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</span><span>3 €</span></div>`).join('')
-    : '<p style="text-align:center;color:var(--muted);font-size:14px;padding:10px">Aucun jour validé pour le moment.</p>';
-}
-
-document.getElementById('addBtn').onclick = () => { days.add(today); save(); render(); };
-document.getElementById('undoBtn').onclick = () => {
-  const last = [...days].sort().pop();
-  if (last) { days.delete(last); save(); render(); }
-};
-document.getElementById('resetBtn').onclick = () => {
-  if (confirm('Effacer tous les jours validés de ' + YEAR + ' ?')) { days.clear(); save(); render(); }
-};
-document.getElementById('prevMonth').onclick = () => { calDate.setMonth(calDate.getMonth() - 1); renderCal(); };
-document.getElementById('nextMonth').onclick = () => { calDate.setMonth(calDate.getMonth() + 1); renderCal(); };
-
-render();
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
-</script>
-</body>
-</html>
 
 
 
