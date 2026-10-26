@@ -1,4 +1,5 @@
-<!DOCTYPE html>
+
+
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -91,14 +92,100 @@
 
   .cal-head {
     display: flex; justify-content: space-between; align-items: center;
-    margin-top: 12px
-Bloquez l'accès non désiré au microphone
-Choisissez quels sites peuvent utiliser votre micro
-×
-ANNONCE
-Installer un antivirus
+    margin-top: 12px<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#a8c5b9">
+<title>Épargne 3 € / jour</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+  :root {
+    --bg: #f2f7f4;
+    --card: #ffffff;
+    --green: #7fb8a4;
+    --green-dark: #4e8a74;
+    --blue: #a9c4d9;
+    --sand: #e8dcc9;
+    --text: #2f4a41;
+    --muted: #6b857c;
+    --radius: 18px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(180deg, #eef5f1 0%, #f6f2ec 100%);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 32px;
+  }
+  header {
+    padding: calc(18px + env(safe-area-inset-top)) 20px 10px;
+    text-align: center;
+  }
+  header h1 { font-size: 22px; font-weight: 600; color: var(--green-dark); }
+  header p { font-size: 13px; color: var(--muted); margin-top: 4px; }
 
-!
+  .wrap { max-width: 420px; margin: 0 auto; padding: 0 16px; }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-top: 14px;
+    box-shadow: 0 4px 14px rgba(79, 138, 116, .10);
+  }
+
+  .total-label { font-size: 13px; color: var(--muted); text-align: center; }
+  .total {
+    font-size: 40px; font-weight: 700; text-align: center;
+    color: var(--green-dark); margin-top: 6px;
+  }
+  .sub { font-size: 13px; color: var(--muted); text-align: center; margin-top: 6px; }
+
+  .row { display: flex; justify-content: space-between; padding: 10px 0; font-size: 15px; }
+  .row + .row { border-top: 1px solid #edf3f0; }
+  .row .k { color: var(--muted); }
+  .row .v { font-weight: 600; }
+
+  button {
+    display: block; width: 100%; margin-top: 14px;
+    background: var(--green); color: #fff; border: none;
+    border-radius: 14px; padding: 15px; font-size: 16px; font-weight: 600;
+    cursor: pointer;
+  }
+  button:active { background: var(--green-dark); }
+  button.ghost { background: transparent; color: var(--green-dark); }
+  button:disabled { background: var(--sand); color: var(--green-dark); }
+
+  .progress {
+    height: 10px; background: #e7efeb;
+    border-radius: 6px; overflow: hidden; margin-top: 12px;
+  }
+  .progress > div {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--green), var(--blue));
+    border-radius: 6px; transition: width .4s ease;
+  }
+
+  .days {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 6px; margin-top: 12px;
+  }
+  .day {
+    aspect-ratio: 1; border-radius: 8px; background: #eef4f1;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: var(--muted);
+  }
+  .day.done { background: var(--green); color: #fff; }
+  .day.today { outline: 2px solid var(--green-dark); font-weight: 700; }
+
+  .cal-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 12px
+
 
 
 
