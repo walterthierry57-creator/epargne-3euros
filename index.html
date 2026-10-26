@@ -34,15 +34,8 @@
       text-align: center;
       margin-bottom: 24px;
     }
-    h1 {
-      margin: 0 0 6px 0;
-      font-size: 1.5rem;
-    }
-    header p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
+    h1 { margin: 0 0 6px 0; font-size: 1.5rem; color: var(--text); }
+    header p { margin: 0; color: var(--muted); font-size: 0.9rem; }
     .card {
       background: var(--card);
       border: 1px solid var(--border);
@@ -104,18 +97,8 @@
       font-size: 0.95rem;
       cursor: pointer;
       margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
     }
-    .btn-export:hover {
-      background: var(--primary-hover);
-    }
-    .calendar-title {
-      font-weight: 600;
-      margin-bottom: 12px;
-    }
+    .calendar-title { font-weight: 600; margin-bottom: 12px; }
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -133,7 +116,6 @@
       color: var(--muted);
       cursor: pointer;
       user-select: none;
-      transition: all 0.15s ease;
     }
     .day-cell.checked {
       background: var(--primary);
@@ -141,12 +123,7 @@
       border-color: var(--primary);
       font-weight: 700;
     }
-    footer {
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.75rem;
-      margin-top: 24px;
-    }
+    footer { text-align: center; color: var(--muted); font-size: 0.75rem; margin-top: 24px; }
   </style>
 </head>
 <body>
@@ -172,7 +149,7 @@
     <div class="stat-box"><span class="stat-label">Cette semaine</span><span class="stat-value" id="weekVal">0 €</span></div>
   </div>
 
-  <button class="btn-export" onclick="exportPDF()">📄 Exporter en PDF</button>
+  <button class="btn-export" id="pdfBtn">📄 Exporter le bilan en PDF</button>
 
   <div class="card">
     <div class="calendar-title">Calendrier de l'année</div>
@@ -186,18 +163,85 @@
 <script>
   const TOTAL_DAYS = 365;
   const DAILY = 3;
-  let activeDays = JSON.parse(localStorage.getItem('epargne_3e_days')) || [];
+
+  // Récupération sécurisée du localStorage
+  let activeDays = [];
+  try {
+    const stored = localStorage.getItem('epargne_3e_days');
+    if (stored) activeDays = JSON.parse(stored);
+    if (!Array.isArray(activeDays)) activeDays = [];
+  } catch(e) {
+    activeDays = [];
+  }
 
   function render() {
     const grid = document.getElementById('calendar');
+    if (!grid) return;
     grid.innerHTML = '';
     
     for (let i = 1; i <= TOTAL_DAYS; i++) {
       const cell = document.createElement('div');
       cell.className = 'day-cell' + (activeDays.includes(i) ? ' checked' : '');
       cell.textContent = i;
-      cell.onclick = () => toggleDay(i);
+      cell.onclick = function() { toggleDay(i); };
       grid.appendChild(cell);
+    }
+
+    const count = activeDays.length;
+    const total = count * DAILY;
+    const rest = (TOTAL_DAYS - count) * DAILY;
+    const pct = (count / TOTAL_DAYS) * 100;
+
+    document.getElementById('totalVal').textContent = total.toFixed(2).replace('.', ',') + ' €';
+    document.getElementById('daysVal').textContent = count;
+    document.getElementById('restVal').textContent = rest.toLocaleString('fr-FR') + ' €';
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('weekVal').textContent = (count > 0 ? (Math.min(count, 7) * DAILY) : 0) + ' €';
+  }
+
+  function toggleDay(day) {
+    const idx = activeDays.indexOf(day);
+    if (idx === -1) {
+      activeDays.push(day);
+    } else {
+      activeDays.splice(idx, 1);
+    }
+    localStorage.setItem('epargne_3e_days', JSON.stringify(activeDays));
+    render();
+  }
+
+  document.getElementById('pdfBtn').onclick = function() {
+    if (!window.jspdf) {
+      alert("Chargement du PDF en cours...");
+      return;
+    }
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const count = activeDays.length;
+    const total = count * DAILY;
+    const rest = (TOTAL_DAYS - count) * DAILY;
+
+    doc.setFontSize(18);
+    doc.text("Bilan Epargne 3 EUR / jour", 14, 20);
+    doc.setFontSize(11);
+    doc.text(`Total epargne : ${total} EUR`, 14, 32);
+    doc.text(`Jours valides : ${count} / 365`, 14, 40);
+    doc.text(`Reste a mettre : ${rest} EUR`, 14, 48);
+
+    const sorted = activeDays.sort((a,b) => a-b).map(d => `J${d}`).join(', ');
+    const textLines = doc.splitTextToSize(sorted.length > 0 ? sorted : "Aucun jour valide.", 180);
+    doc.text(textLines, 14, 60);
+
+    doc.save('Epargne_3_Euros.pdf');
+  };
+
+  // Lancement initial au chargement
+  document.addEventListener("DOMContentLoaded", render);
+  render();
+</script>
+</body>
+</html>
+
 
 
 
