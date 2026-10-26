@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Épargne 3 € / jour</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
   <style>
     :root {
       --bg: #f8fafc;
@@ -33,7 +31,6 @@
     header {
       text-align: center;
       margin-bottom: 20px;
-      position: relative;
     }
     h1 { margin: 0; font-size: 1.5rem; color: var(--primary-dark); }
     p { margin: 5px 0; color: var(--muted); font-size: 0.9rem; }
@@ -75,7 +72,7 @@
       font-weight: bold;
       cursor: pointer;
       font-size: 1rem;
-      margin-top: 10px;
+      margin-bottom: 15px;
     }
     .btn-export:hover { background: var(--primary-dark); }
   </style>
@@ -103,7 +100,7 @@
     <div class="stat-item"><div class="stat-label">Cette semaine</div><div class="stat-val" id="weekAmount">0 €</div></div>
   </div>
 
-  <button class="btn-export" onclick="exportPDF()">📄 Exporter l'historique en PDF</button>
+  <button class="btn-export" onclick="exportPDF()">📄 Exporter le bilan en PDF</button>
 
   <div class="card">
     <div style="font-weight: bold; margin-bottom: 10px;">Calendrier de l'année</div>
@@ -111,6 +108,7 @@
   </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
   const TOTAL_DAYS = 365;
   const DAILY_AMOUNT = 3;
@@ -158,32 +156,30 @@
   }
 
   function exportPDF() {
+    if (!window.jspdf) {
+      alert("Erreur de chargement du module PDF. Vérifie ta connexion.");
+      return;
+    }
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-
-    doc.setFontSize(18);
-    doc.text("Bilan Épargne 3 € / jour", 14, 20);
 
     const count = savedDays.length;
     const total = count * DAILY_AMOUNT;
     const remaining = (TOTAL_DAYS - count) * DAILY_AMOUNT;
 
+    doc.setFontSize(18);
+    doc.text("Bilan Epargne 3 EUR / jour", 14, 20);
+
     doc.setFontSize(11);
-    doc.text(`Total épargné : ${total} €`, 14, 32);
-    doc.text(`Jours validés : ${count} / 365`, 14, 40);
-    doc.text(`Reste à mettre de côté : ${remaining} €`, 14, 48);
+    doc.text(`Total epargne : ${total} EUR`, 14, 32);
+    doc.text(`Jours valides : ${count} / 365`, 14, 40);
+    doc.text(`Reste a mettre de cote : ${remaining} EUR`, 14, 48);
 
-    const rows = [];
-    for (let i = 1; i <= TOTAL_DAYS; i++) {
-      const status = savedDays.includes(i) ? 'Validé' : 'En attente';
-      rows.push([`Jour ${i}`, `${DAILY_AMOUNT} €`, status]);
-    }
-
-    doc.autoTable({
-      startY: 55,
-      head: [['Jour', 'Montant', 'Statut']],
-      body: rows,
-    });
+    doc.text("Historique des jours valides :", 14, 60);
+    const validatedList = savedDays.sort((a, b) => a - b).map(d => `Jour ${d}`).join(', ');
+    
+    const splitText = doc.splitTextToSize(validatedList.length > 0 ? validatedList : "Aucun jour valide pour le moment.", 180);
+    doc.text(splitText, 14, 68);
 
     doc.save('Epargne_3_Euros_Bilan.pdf');
   }
@@ -192,6 +188,7 @@
 </script>
 </body>
 </html>
+
 
           
           
