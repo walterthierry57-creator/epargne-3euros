@@ -1,177 +1,202 @@
-```html
-<!-- ... existing code ... -->
-            <div class="flex items-center gap-2">
-                <button id="themeToggleBtn" class="p-2.5 rounded-xl text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Changer le thème">
-                    <i class="fa-solid fa-moon dark:hidden"></i>
-                    <i class="fa-solid fa-sun hidden dark:block text-amber-400"></i>
-                </button>
-               
-                <!-- Bouton Export PDF -->
-                <button id="exportPdfBtn" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-semibold shadow-sm transition-colors">
-                    <i class="fa-solid fa-file-pdf text-sm"></i>
-                    <span class="hidden sm:inline">Export PDF</span>
-                </button>
-            </div>
-        </div>
-    </header>
-<!-- ... existing code ... -->
-    <!-- Scripts CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Bibliothèques pour la génération PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<!-- ... existing code ... -->
-    <script>
-        // ... existing code ...
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Épargne 3 € / jour</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --border: #e2e8f0;
+      --muted: #64748b;
+    }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px 10px;
+      display: flex;
+      justify-content: center;
+    }
+    .app {
+      max-width: 500px;
+      width: 100%;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    h1 { margin: 0; font-size: 1.5rem; color: var(--primary-dark); }
+    p { margin: 5px 0; color: var(--muted); font-size: 0.9rem; }
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 15px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .total-val { font-size: 2rem; font-weight: bold; text-align: center; color: var(--primary-dark); margin: 10px 0; }
+    .progress-bg { background: #e2e8f0; border-radius: 8px; height: 12px; overflow: hidden; }
+    .progress-bar { background: var(--primary); height: 100%; width: 0%; transition: width 0.3s; }
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; text-align: center; }
+    .stat-item { padding: 10px; background: #f1f5f9; border-radius: 8px; }
+    .stat-label { font-size: 0.8rem; color: var(--muted); }
+    .stat-val { font-size: 1.1rem; font-weight: bold; }
+    .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; }
+    .day-btn {
+      aspect-ratio: 1;
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .day-btn.active { background: var(--primary); color: white; border-color: var(--primary-dark); font-weight: bold; }
+    .btn-export {
+      width: 100%;
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 10px;
+    }
+    .btn-export:hover { background: var(--primary-dark); }
+  </style>
+</head>
+<body>
 
-        function setupEventListeners() {
-            // ... existing code ...
+<div class="app">
+  <header>
+    <h1>🌿 Épargne 3 € / jour</h1>
+    <p>3 € chaque jour, toute l'année</p>
+  </header>
 
-            // Écouteur pour le bouton Export PDF
-            const pdfBtn = document.getElementById('exportPdfBtn');
-            if (pdfBtn) {
-                pdfBtn.addEventListener('click', generatePDFExport);
-            }
-        }
+  <div class="card">
+    <div style="text-align: center; font-size: 0.9rem; color: var(--muted);">Total mis de côté cette année</div>
+    <div class="total-val" id="totalAmount">0,00 €</div>
+    <div class="progress-bg">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+  </div>
 
-        // Fonction de génération et téléchargement du PDF
-        function generatePDFExport() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+  <div class="card grid">
+    <div class="stat-item"><div class="stat-label">Jours validés</div><div class="stat-val" id="countDays">0</div></div>
+    <div class="stat-item"><div class="stat-label">Objectif (365 j)</div><div class="stat-val">1 095 €</div></div>
+    <div class="stat-item"><div class="stat-label">Reste à épargner</div><div class="stat-val" id="remAmount">1 095 €</div></div>
+    <div class="stat-item"><div class="stat-label">Cette semaine</div><div class="stat-val" id="weekAmount">0 €</div></div>
+  </div>
 
-            // Calcul des données
-            const dailyAmount = 3; // 3€ par jour
-            const totalDays = 365;
-            const targetTotal = dailyAmount * totalDays;
-           
-            // Récupération des jours cochés (depuis localStorage ou state global)
-            const savedDays = JSON.parse(localStorage.getItem('savedDays') || '[]');
-            const checkedCount = savedDays.length;
-            const totalSaved = checkedCount * dailyAmount;
-            const remainingAmount = targetTotal - totalSaved;
-            const progressPercentage = Math.round((checkedCount / totalDays) * 100);
+  <button class="btn-export" onclick="exportPDF()">📄 Exporter l'historique en PDF</button>
 
-            // En-tête / Header
-            doc.setFillColor(16, 185, 129); // Couleur Emerald-500
-            doc.rect(0, 0, 210, 25, 'F');
-           
-            doc.setTextColor(255, 255, 255);
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(16);
-            doc.text("Bilan d'Épargne - 3€ par Jour", 14, 16);
+  <div class="card">
+    <div style="font-weight: bold; margin-bottom: 10px;">Calendrier de l'année</div>
+    <div class="calendar" id="calendarGrid"></div>
+  </div>
+</div>
 
-            // Date du rapport
-            const today = new Date().toLocaleDateString('fr-FR', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-            });
-            doc.setFontSize(9);
-            doc.setFont("helvetica", "normal");
-            doc.text(`Généré le : ${today}`, 196, 16, { align: 'right' });
+<script>
+  const TOTAL_DAYS = 365;
+  const DAILY_AMOUNT = 3;
+  let savedDays = JSON.parse(localStorage.getItem('epargne_3e_days')) || [];
 
-            // Synthèse Global (Bloc de statistiques)
-            doc.setTextColor(30, 41, 59);
-            doc.setFontSize(12);
-            doc.setFont("helvetica", "bold");
-            doc.text("Résumé du Défi", 14, 38);
+  function initApp() {
+    renderCalendar();
+    updateStats();
+  }
 
-            doc.setDrawColor(226, 232, 240);
-            doc.setFillColor(248, 250, 252);
-            doc.roundedRect(14, 43, 182, 32, 3, 3, 'FD');
+  function toggleDay(day) {
+    const idx = savedDays.indexOf(day);
+    if (idx === -1) {
+      savedDays.push(day);
+    } else {
+      savedDays.splice(idx, 1);
+    }
+    localStorage.setItem('epargne_3e_days', JSON.stringify(savedDays));
+    renderCalendar();
+    updateStats();
+  }
 
-            doc.setFontSize(10);
-            doc.setFont("helvetica", "normal");
-            doc.text(`Total épargné :`, 20, 53);
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(16, 185, 129);
-            doc.text(`${totalSaved} € / ${targetTotal} € (${progressPercentage}%)`, 60, 53);
+  function renderCalendar() {
+    const grid = document.getElementById('calendarGrid');
+    grid.innerHTML = '';
+    for (let i = 1; i <= TOTAL_DAYS; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'day-btn' + (savedDays.includes(i) ? ' active' : '');
+      btn.textContent = i;
+      btn.onclick = () => toggleDay(i);
+      grid.appendChild(btn);
+    }
+  }
 
-            doc.setTextColor(30, 41, 59);
-            doc.setFont("helvetica", "normal");
-            doc.text(`Jours validés :`, 20, 62);
-            doc.setFont("helvetica", "bold");
-            doc.text(`${checkedCount} sur ${totalDays} jours`, 60, 62);
+  function updateStats() {
+    const count = savedDays.length;
+    const total = count * DAILY_AMOUNT;
+    const remaining = (TOTAL_DAYS - count) * DAILY_AMOUNT;
+    const progress = (count / TOTAL_DAYS) * 100;
 
-            doc.setFont("helvetica", "normal");
-            doc.text(`Reste à épargner :`, 20, 70);
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(225, 29, 72);
-            doc.text(`${remainingAmount} €`, 60, 70);
+    document.getElementById('totalAmount').textContent = total.toLocaleString('fr-FR') + ' €';
+    document.getElementById('countDays').textContent = count;
+    document.getElementById('remAmount').textContent = remaining.toLocaleString('fr-FR') + ' €';
+    document.getElementById('progressBar').style.width = progress + '%';
+  }
 
-            // Préparation des données du tableau détaillé
-            const tableRows = [];
-            for (let i = 1; i <= totalDays; i++) {
-                const isChecked = savedDays.includes(i);
-                tableRows.push([
-                    `Jour ${i}`,
-                    `${dailyAmount} €`,
-                    isChecked ? "Validé" : "En attente",
-                    `${i * dailyAmount} €`
-                ]);
-            }
+  function exportPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
 
-            // Génération du tableau avec AutoTable
-            doc.autoTable({
-                startY: 83,
-                head: [['Jour', 'Montant', 'Statut', 'Cumul Atteint']],
-                body: tableRows,
-                theme: 'striped',
-                headStyles: {
-                    fillColor: [16, 185, 129],
-                    textColor: [255, 255, 255],
-                    fontStyle: 'bold'
-                },
-                columnStyles: {
-                    0: { cellWidth: 35 },
-                    1: { cellWidth: 35 },
-                    2: { cellWidth: 50, fontStyle: 'bold' },
-                    3: { cellWidth: 45, halign: 'right' }
-                },
-                didParseCell: function(data) {
-                    if (data.column.index === 2 && data.cell.section === 'body') {
-                        if (data.cell.raw === 'Validé') {
-                            data.cell.styles.textColor = [16, 185, 129];
-                        } else {
-                            data.cell.styles.textColor = [148, 163, 184];
-                        }
-                    }
-                }
-            });
+    doc.setFontSize(18);
+    doc.text("Bilan Épargne 3 € / jour", 14, 20);
 
-            // Pied de page (Pagination)
-            const pageCount = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                doc.setFontSize(8);
-                doc.setTextColor(148, 163, 184);
-                doc.text(
-                    `Page ${i} sur ${pageCount} - Épargne 3€/jour`,
-                    105,
-                    290,
-                    { align: 'center' }
-                );
-            }
+    const count = savedDays.length;
+    const total = count * DAILY_AMOUNT;
+    const remaining = (TOTAL_DAYS - count) * DAILY_AMOUNT;
 
-            // Téléchargement du fichier
-            doc.save(`epargne-3euros-bilan-${new Date().toISOString().slice(0, 10)}.pdf`);
-           
-            if (typeof showToast === 'function') {
-                showToast("Fichier PDF téléchargé avec succès !");
-            }
-        }
+    doc.setFontSize(11);
+    doc.text(`Total épargné : ${total} €`, 14, 32);
+    doc.text(`Jours validés : ${count} / 365`, 14, 40);
+    doc.text(`Reste à mettre de côté : ${remaining} €`, 14, 48);
 
-        // ... existing code ...
-    </script>
+    const rows = [];
+    for (let i = 1; i <= TOTAL_DAYS; i++) {
+      const status = savedDays.includes(i) ? 'Validé' : 'En attente';
+      rows.push([`Jour ${i}`, `${DAILY_AMOUNT} €`, status]);
+    }
+
+    doc.autoTable({
+      startY: 55,
+      head: [['Jour', 'Montant', 'Statut']],
+      body: rows,
+    });
+
+    doc.save('Epargne_3_Euros_Bilan.pdf');
+  }
+
+  initApp();
+</script>
 </body>
 </html>
 
-```
+          
+          
 
-
-
+       
 
     
    
