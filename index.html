@@ -1,279 +1,250 @@
 
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Épargne 3 € / jour</title>
-  <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card: #1e293b;
-      --border: #334155;
-      --text: #f8fafc;
-      --muted: #94a3b8;
-      --primary: #10b981;
-      --primary-hover: #059669;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      margin: 0;
-      padding: 16px;
-      display: flex;
-      justify-content: center;
-    }
-    .container {
-      width: 100%;
-      max-width: 500px;
-    }
-    header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    h1 { margin: 0 0 6px 0; font-size: 1.5rem; color: var(--text); }
-    header p { margin: 0; color: var(--muted); font-size: 0.9rem; }
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 16px;
-    }
-    .total-title {
-      color: var(--muted);
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      text-align: center;
-    }
-    .total-amount {
-      font-size: 2.25rem;
-      font-weight: 700;
-      text-align: center;
-      margin: 8px 0 16px 0;
-      color: var(--primary);
-    }
-    .progress-bar {
-      height: 8px;
-      background: var(--border);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    .progress-fill {
-      height: 100%;
-      background: var(--primary);
-      width: 0%;
-      transition: width 0.3s ease;
-    }
-    .stats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    .stat-box {
-      background: rgba(15, 23, 42, 0.5);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.85rem;
-    }
-    .stat-label { color: var(--muted); }
-    .stat-value { font-weight: 600; }
-    .btn-export {
-      width: 100%;
-      background: var(--primary);
-      color: #000;
-      border: none;
-      padding: 12px;
-      border-radius: 8px;
-      font-weight: 700;
-      font-size: 0.95rem;
-      cursor: pointer;
-      margin-bottom: 16px;
-    }
-    .btn-export:hover { background: var(--primary-hover); }
-    .month-block { margin-bottom: 16px; }
-    .month-title {
-      font-weight: 600;
-      font-size: 0.95rem;
-      color: var(--primary);
-      margin-bottom: 8px;
-    }
-    .days-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 6px;
-    }
-    .day-cell {
-      aspect-ratio: 1;
-      border: 1px solid var(--border);
-      background: rgba(15, 23, 42, 0.3);
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.75rem;
-      color: var(--muted);
-      cursor: pointer;
-      user-select: none;
-    }
-    .day-cell.checked {
-      background: var(--primary);
-      color: #000;
-      border-color: var(--primary);
-      font-weight: 700;
-    }
-    footer { text-align: center; color: var(--muted); font-size: 0.75rem; margin-top: 24px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#a8c5b9">
+<title>Épargne 3 € / jour</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+  :root {
+    --bg: #f2f7f4;
+    --card: #ffffff;
+    --green: #7fb8a4;
+    --green-dark: #4e8a74;
+    --blue: #a9c4d9;
+    --sand: #e8dcc9;
+    --text: #2f4a41;
+    --muted: #6b857c;
+    --radius: 18px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(180deg, #eef5f1 0%, #f6f2ec 100%);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 32px;
+  }
+  header {
+    padding: calc(18px + env(safe-area-inset-top)) 20px 10px;
+    text-align: center;
+  }
+  header h1 { font-size: 22px; font-weight: 600; color: var(--green-dark); }
+  header p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  .wrap { max-width: 420px; margin: 0 auto; padding: 0 16px; }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-top: 14px;
+    box-shadow: 0 4px 14px rgba(79, 138, 116, .10);
+  }
+
+  .total-label { font-size: 13px; color: var(--muted); text-align: center; }
+  .total {
+    font-size: 40px; font-weight: 700; text-align: center;
+    color: var(--green-dark); margin-top: 6px;
+  }
+  .sub { font-size: 13px; color: var(--muted); text-align: center; margin-top: 6px; }
+
+  .row { display: flex; justify-content: space-between; padding: 10px 0; font-size: 15px; }
+  .row + .row { border-top: 1px solid #edf3f0; }
+  .row .k { color: var(--muted); }
+  .row .v { font-weight: 600; }
+
+  button {
+    display: block; width: 100%; margin-top: 14px;
+    background: var(--green); color: #fff; border: none;
+    border-radius: 14px; padding: 15px; font-size: 16px; font-weight: 600;
+    cursor: pointer;
+  }
+  button:active { background: var(--green-dark); }
+  button.ghost { background: transparent; color: var(--green-dark); }
+  button:disabled { background: var(--sand); color: var(--green-dark); }
+
+  .progress {
+    height: 10px; background: #e7efeb;
+    border-radius: 6px; overflow: hidden; margin-top: 12px;
+  }
+  .progress > div {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--green), var(--blue));
+    border-radius: 6px; transition: width .4s ease;
+  }
+
+  .days {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 6px; margin-top: 12px;
+  }
+  .day {
+    aspect-ratio: 1; border-radius: 8px; background: #eef4f1;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: var(--muted);
+  }
+  .day.done { background: var(--green); color: #fff; }
+  .day.today { outline: 2px solid var(--green-dark); font-weight: 700; }
+
+  .cal-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 12px;
+  }
+  .cal-head button {
+    width: auto; margin: 0; padding: 8px 20px;
+    background: var(--sand); color: var(--text);
+    border-radius: 10px; font-size: 20px; font-weight: 700;
+  }
+  .cal-title { font-size: 15px; font-weight: 600; }
+
+  .history { margin-top: 8px; }
+  .hist-item { display: flex; justify-content: space-between; padding: 9px 0; font-size: 14px; border-bottom: 1px solid #edf3f0; }
+
+  footer { text-align: center; font-size: 12px; color: var(--muted); margin-top: 22px; }
+</style>
 </head>
 <body>
+<header>
+  <h1>🌿 Épargne 3 € / jour</h1>
+  <p>3 € chaque jour, toute l'année</p>
+</header>
 
-<div class="container">
-  <header>
-    <h1>🌿 Épargne 3 € / jour</h1>
-    <p>3 € chaque jour, toute l'année</p>
-  </header>
+<div class="wrap">
 
   <div class="card">
-    <div class="total-title">Total mis de côté cette année</div>
-    <div class="total-amount" id="totalVal">0,00 €</div>
-    <div class="progress-bar">
-      <div class="progress-fill" id="progressFill"></div>
+    <div class="total-label">Total mis de côté cette année</div>
+    <div class="total" id="total">0,00 €</div>
+    <div class="sub" id="objective"></div>
+    <div class="progress"><div id="bar"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="row"><span class="k">Jours validés</span><span class="v" id="daysCount">0</span></div>
+    <div class="row"><span class="k">Objectif annuel (365 j)</span><span class="v">1 095 €</span></div>
+    <div class="row"><span class="k">Reste à mettre de côté</span><span class="v" id="remain">1 095 €</span></div>
+    <div class="row"><span class="k">Cette semaine</span><span class="v" id="week">0 €</span></div>
+    <button id="addBtn">+ J'ai mis mes 3 € de côté aujourd'hui</button>
+    <button class="ghost" id="undoBtn">Annuler le dernier jour</button>
+  </div>
+
+  <div class="card">
+    <div class="cal-title" style="text-align:center;margin-bottom:6px">Calendrier</div>
+    <div class="cal-head">
+      <button id="prevMonth">◀</button>
+      <span class="cal-title" id="monthLabel"></span>
+      <button id="nextMonth">▶</button>
     </div>
+    <div class="days" id="dow"></div>
+    <div class="days" id="calendar"></div>
   </div>
 
-  <div class="card stats-grid">
-    <div class="stat-box"><span class="stat-label">Jours validés</span><span class="stat-value" id="daysVal">0</span></div>
-    <div class="stat-box"><span class="stat-label">Objectif annuel</span><span class="stat-value">1 095 €</span></div>
-    <div class="stat-box"><span class="stat-label">Reste à mettre</span><span class="stat-value" id="restVal">1 095 €</span></div>
-    <div class="stat-box"><span class="stat-label">Cette semaine</span><span class="stat-value" id="weekVal">0 €</span></div>
+  <div class="card">
+    <div class="cal-title" style="text-align:center;margin-bottom:4px">Historique</div>
+    <div class="history" id="history"></div>
+    <button class="ghost" id="resetBtn">Réinitialiser l'année</button>
   </div>
-
-  <button class="btn-export" id="pdfBtn">📄 Exporter le bilan en PDF</button>
-
-  <div class="card" id="monthsContainer"></div>
 
   <footer>Données enregistrées sur ton téléphone — fonctionne hors ligne</footer>
 </div>
 
-<script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
 <script>
-  const DAILY = 3;
-  const MONTHS = [
-    { name: "Janvier", days: 31 },
-    { name: "Février", days: 28 },
-    { name: "Mars", days: 31 },
-    { name: "Avril", days: 30 },
-    { name: "Mai", days: 31 },
-    { name: "Juin", days: 30 },
-    { name: "Juillet", days: 31 },
-    { name: "Août", days: 31 },
-    { name: "Septembre", days: 30 },
-    { name: "Octobre", days: 31 },
-    { name: "Novembre", days: 30 },
-    { name: "Décembre", days: 31 }
-  ];
+const DAILY = 3;
+const YEAR = new Date().getFullYear();
+const KEY = 'epargne-' + YEAR;
+let days = new Set(JSON.parse(localStorage.getItem(KEY) || '[]'));
+let calDate = new Date();
 
-  let savedData = {};
-  try {
-    savedData = JSON.parse(localStorage.getItem('epargne_3e_months')) || {};
-  } catch(e) {
-    savedData = {};
+const fmt = n => n.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €';
+const iso = d => d.toISOString().slice(0, 10);
+const today = iso(new Date());
+
+function save() {
+  localStorage.setItem(KEY, JSON.stringify([...days]));
+}
+function total() { return days.size * DAILY; }
+
+function render() {
+  const t = total();
+  document.getElementById('total').textContent = fmt(t);
+  document.getElementById('daysCount').textContent = days.size;
+  const goal = 365 * DAILY;
+  document.getElementById('remain').textContent = fmt(Math.max(0, goal - t));
+  const pct = Math.min(100, (t / goal * 100)).toFixed(1);
+  document.getElementById('objective').textContent = pct + ' % de l\'objectif annuel';
+  document.getElementById('bar').style.width = pct + '%';
+
+  const now = new Date();
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+  let weekSum = 0;
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday); d.setDate(monday.getDate() + i);
+    if (days.has(iso(d))) weekSum += DAILY;
   }
+  document.getElementById('week').textContent = fmt(weekSum);
+  document.getElementById('addBtn').disabled = days.has(today);
+  document.getElementById('addBtn').textContent = days.has(today)
+    ? '✓ Jour déjà validé — à toi demain !'
+    : "+ J'ai mis mes 3 € de côté aujourd'hui";
+  renderCal();
+  renderHistory();
+}
 
-  function render() {
-    const container = document.getElementById('monthsContainer');
-    if (!container) return;
-    container.innerHTML = '';
-
-    let totalChecked = 0;
-
-    MONTHS.forEach((m, mIdx) => {
-      const monthBlock = document.createElement('div');
-      monthBlock.className = 'month-block';
-
-      const title = document.createElement('div');
-      title.className = 'month-title';
-      title.textContent = m.name;
-      monthBlock.appendChild(title);
-
-      const grid = document.createElement('div');
-      grid.className = 'days-grid';
-
-      for (let d = 1; d <= m.days; d++) {
-        const key = `${mIdx}_${d}`;
-        const isChecked = !!savedData[key];
-
-        if (isChecked) totalChecked++;
-
-        const cell = document.createElement('div');
-        cell.className = 'day-cell' + (isChecked ? ' checked' : '');
-        cell.textContent = d;
-        cell.onclick = () => toggleDay(key);
-        grid.appendChild(cell);
-      }
-
-      monthBlock.appendChild(grid);
-      container.appendChild(monthBlock);
-    });
-
-    const totalAmount = totalChecked * DAILY;
-    const restAmount = (365 - totalChecked) * DAILY;
-    const pct = (totalChecked / 365) * 100;
-
-    document.getElementById('totalVal').textContent = totalAmount.toFixed(2).replace('.', ',') + ' €';
-    document.getElementById('daysVal').textContent = totalChecked;
-    document.getElementById('restVal').textContent = restAmount.toLocaleString('fr-FR') + ' €';
-    document.getElementById('progressFill').style.width = pct + '%';
-    document.getElementById('weekVal').textContent = (totalChecked > 0 ? (Math.min(totalChecked, 7) * DAILY) : 0) + ' €';
+function renderCal() {
+  const y = calDate.getFullYear(), m = calDate.getMonth();
+  document.getElementById('monthLabel').textContent =
+    calDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  const dowEl = document.getElementById('dow');
+  dowEl.innerHTML = ['L', 'M', 'M', 'J', 'V', 'S', 'D'].map(d => `<div class="day">${d}</div>`).join('');
+  const first = new Date(y, m, 1);
+  const offset = (first.getDay() + 6) % 7;
+  const nb = new Date(y, m + 1, 0).getDate();
+  let html = '';
+  for (let i = 0; i < offset; i++) html += '<div></div>';
+  for (let d = 1; d <= nb; d++) {
+    const ds = iso(new Date(y, m, d));
+    const cls = ['day'];
+    if (days.has(ds)) cls.push('done');
+    if (ds === today) cls.push('today');
+    html += `<div class="${cls.join(' ')}">${d}</div>`;
   }
+  document.getElementById('calendar').innerHTML = html;
+}
 
-  function toggleDay(key) {
-    if (savedData[key]) {
-      delete savedData[key];
-    } else {
-      savedData[key] = true;
-    }
-    localStorage.setItem('epargne_3e_months', JSON.stringify(savedData));
-    render();
-  }
+function renderHistory() {
+  const list = [...days].sort().reverse().slice(0, 15);
+  document.getElementById('history').innerHTML = list.length
+    ? list.map(d => `<div class="hist-item"><span>${new Date(d + 'T12:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</span><span>3 €</span></div>`).join('')
+    : '<p style="text-align:center;color:var(--muted);font-size:14px;padding:10px">Aucun jour validé pour le moment.</p>';
+}
 
-  document.getElementById('pdfBtn').onclick = function() {
-    try {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      
-      let totalChecked = Object.keys(savedData).length;
-      let totalAmount = totalChecked * DAILY;
-      let restAmount = (365 - totalChecked) * DAILY;
+document.getElementById('addBtn').onclick = () => { days.add(today); save(); render(); };
+document.getElementById('undoBtn').onclick = () => {
+  const last = [...days].sort().pop();
+  if (last) { days.delete(last); save(); render(); }
+};
+document.getElementById('resetBtn').onclick = () => {
+  if (confirm('Effacer tous les jours validés de ' + YEAR + ' ?')) { days.clear(); save(); render(); }
+};
+document.getElementById('prevMonth').onclick = () => { calDate.setMonth(calDate.getMonth() - 1); renderCal(); };
+document.getElementById('nextMonth').onclick = () => { calDate.setMonth(calDate.getMonth() + 1); renderCal(); };
 
-      doc.setFontSize(18);
-      doc.text("Bilan Epargne 3 EUR / jour", 14, 20);
-      doc.setFontSize(11);
-      doc.text(`Total epargne : ${totalAmount} EUR`, 14, 32);
-      doc.text(`Jours valides : ${totalChecked} / 365`, 14, 40);
-      doc.text(`Reste a mettre : ${restAmount} EUR`, 14, 48);
-
-      doc.save('Epargne_3_Euros.pdf');
-    } catch(err) {
-      alert("Impossible de générer le PDF pour le moment. Vérifiez votre connexion.");
-    }
-  };
-
-  render();
+render();
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
 </body>
 </html>
 
 
 !
+
+
+
+
 
 
 
