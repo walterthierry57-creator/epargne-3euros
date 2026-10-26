@@ -1,1 +1,13 @@
-
+{
+  "name": "Épargne 3 € / jour",
+  "short_name": "Épargne 3€",
+  "description": "Mettre 3 € de côté chaque jour sur toute l'année",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f2f7f4",
+  "theme_color": "#7fb8a4",
+  "lang": "fr",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
