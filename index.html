@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -5,8 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Épargne 3 € / jour</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="icon.svg">
-  <link rel="manifest" href="manifest.json">
   <style>
     :root {
       --bg: #0f172a;
@@ -28,11 +27,11 @@
     }
     .container {
       width: 100%;
-      max-width: 480px;
+      max-width: 500px;
     }
     header {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
     h1 { margin: 0 0 6px 0; font-size: 1.5rem; color: var(--text); }
     header p { margin: 0; color: var(--muted); font-size: 0.9rem; }
@@ -97,9 +96,18 @@
       font-size: 0.95rem;
       cursor: pointer;
       margin-bottom: 16px;
+      border-radius: 8px;
     }
-    .calendar-title { font-weight: 600; margin-bottom: 12px; }
-    .calendar-grid {
+    .month-block {
+      margin-bottom: 16px;
+    }
+    .month-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+    .days-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 6px;
@@ -151,9 +159,8 @@
 
   <button class="btn-export" id="pdfBtn">📄 Exporter le bilan en PDF</button>
 
-  <div class="card">
-    <div class="calendar-title">Calendrier de l'année</div>
-    <div class="calendar-grid" id="calendar"></div>
+  <div class="card" id="monthsContainer">
+    <!-- Les mois s'afficheront ici -->
   </div>
 
   <footer>Données enregistrées sur ton téléphone — fonctionne hors ligne</footer>
@@ -161,86 +168,64 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
-  const TOTAL_DAYS = 365;
   const DAILY = 3;
+  const MONTHS = [
+    { name: "Janvier", days: 31 },
+    { name: "Février", days: 28 },
+    { name: "Mars", days: 31 },
+    { name: "Avril", days: 30 },
+    { name: "Mai", days: 31 },
+    { name: "Juin", days: 30 },
+    { name: "Juillet", days: 31 },
+    { name: "Août", days: 31 },
+    { name: "Septembre", days: 30 },
+    { name: "Octobre", days: 31 },
+    { name: "Novembre", days: 30 },
+    { name: "Décembre", days: 31 }
+  ];
 
-  // Récupération sécurisée du localStorage
-  let activeDays = [];
-  try {
-    const stored = localStorage.getItem('epargne_3e_days');
-    if (stored) activeDays = JSON.parse(stored);
-    if (!Array.isArray(activeDays)) activeDays = [];
-  } catch(e) {
-    activeDays = [];
-  }
+  let savedData = JSON.parse(localStorage.getItem('epargne_3e_months')) || {};
 
   function render() {
-    const grid = document.getElementById('calendar');
-    if (!grid) return;
-    grid.innerHTML = '';
-    
-    for (let i = 1; i <= TOTAL_DAYS; i++) {
-      const cell = document.createElement('div');
-      cell.className = 'day-cell' + (activeDays.includes(i) ? ' checked' : '');
-      cell.textContent = i;
-      cell.onclick = function() { toggleDay(i); };
-      grid.appendChild(cell);
-    }
+    const container = document.getElementById('monthsContainer');
+    container.innerHTML = '';
 
-    const count = activeDays.length;
-    const total = count * DAILY;
-    const rest = (TOTAL_DAYS - count) * DAILY;
-    const pct = (count / TOTAL_DAYS) * 100;
+    let totalChecked = 0;
 
-    document.getElementById('totalVal').textContent = total.toFixed(2).replace('.', ',') + ' €';
-    document.getElementById('daysVal').textContent = count;
-    document.getElementById('restVal').textContent = rest.toLocaleString('fr-FR') + ' €';
-    document.getElementById('progressFill').style.width = pct + '%';
-    document.getElementById('weekVal').textContent = (count > 0 ? (Math.min(count, 7) * DAILY) : 0) + ' €';
-  }
+    MONTHS.forEach((m, mIdx) => {
+      const monthBlock = document.createElement('div');
+      monthBlock.className = 'month-block';
 
-  function toggleDay(day) {
-    const idx = activeDays.indexOf(day);
-    if (idx === -1) {
-      activeDays.push(day);
-    } else {
-      activeDays.splice(idx, 1);
-    }
-    localStorage.setItem('epargne_3e_days', JSON.stringify(activeDays));
-    render();
-  }
+      const title = document.createElement('div');
+      title.className = 'month-title';
+      title.textContent = m.name;
+      monthBlock.appendChild(title);
 
-  document.getElementById('pdfBtn').onclick = function() {
-    if (!window.jspdf) {
-      alert("Chargement du PDF en cours...");
-      return;
-    }
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const count = activeDays.length;
-    const total = count * DAILY;
-    const rest = (TOTAL_DAYS - count) * DAILY;
+      const grid = document.createElement('div');
+      grid.className = 'days-grid';
 
-    doc.setFontSize(18);
-    doc.text("Bilan Epargne 3 EUR / jour", 14, 20);
-    doc.setFontSize(11);
-    doc.text(`Total epargne : ${total} EUR`, 14, 32);
-    doc.text(`Jours valides : ${count} / 365`, 14, 40);
-    doc.text(`Reste a mettre : ${rest} EUR`, 14, 48);
+      for (let d = 1; d <= m.days; d++) {
+        const key = `${mIdx}_${d}`;
+        const isChecked = !!savedData[key];
 
-    const sorted = activeDays.sort((a,b) => a-b).map(d => `J${d}`).join(', ');
-    const textLines = doc.splitTextToSize(sorted.length > 0 ? sorted : "Aucun jour valide.", 180);
-    doc.text(textLines, 14, 60);
+        if (isChecked) totalChecked++;
 
-    doc.save('Epargne_3_Euros.pdf');
-  };
+        const cell = document.createElement('div');
+        cell.className = 'day-cell' + (isChecked ? ' checked' : '');
+        cell.textContent = d;
+        cell.onclick = () => toggleDay(key);
+        grid.appendChild(cell);
+      }
 
-  // Lancement initial au chargement
-  document.addEventListener("DOMContentLoaded", render);
-  render();
-</script>
-</body>
-</html>
+      monthBlock.appendChild(grid);
+      container.appendChild(monthBlock);
+    });
+
+    const totalAmount = totalChecked * DAILY;
+    const restAmount = (365 - totalChecked) * DAILY;
+    const pct = (totalChecked / 365) * 100;
+
+    document.getElementById
 
 
 
