@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -87,6 +88,11 @@
   }
   .day.done { background: var(--green); color: #fff; }
   .day.today { outline: 2px solid var(--green-dark); font-weight: 700; }
+  .day.clickable { cursor: pointer; }
+  .day.clickable:active { background: var(--sand); }
+  .day.future { opacity: .45; }
+
+  .hint { font-size: 12px; color: var(--muted); text-align: center; margin-top: 10px; }
 
   .cal-head {
     display: flex; justify-content: space-between; align-items: center;
@@ -101,12 +107,6 @@
 
   .history { margin-top: 8px; }
   .hist-item { display: flex; justify-content: space-between; padding: 9px 0; font-size: 14px; border-bottom: 1px solid #edf3f0; }
-
-  @media print {
-    body > header, .wrap > .card:not(.print-me), footer { display: none !important; }
-    body { background: #fff; }
-    .card { box-shadow: none; border: 1px solid #ccc; }
-  }
 
   footer { text-align: center; font-size: 12px; color: var(--muted); margin-top: 22px; }
 </style>
@@ -144,6 +144,7 @@
     </div>
     <div class="days" id="dow"></div>
     <div class="days" id="calendar"></div>
+    <div class="hint">💡 Touche un jour passé pour le cocher ou le décocher</div>
   </div>
 
   <div class="card">
@@ -164,13 +165,24 @@ let days = new Set(JSON.parse(localStorage.getItem(KEY) || '[]'));
 let calDate = new Date();
 
 const fmt = n => n.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €';
-const iso = d => d.toISOString().slice(0, 10);
+const iso = d =>
+  d.getFullYear() + '-' +
+  String(d.getMonth() + 1).padStart(2, '0') + '-' +
+  String(d.getDate()).padStart(2, '0');
 const today = iso(new Date());
 
 function save() {
   localStorage.setItem(KEY, JSON.stringify([...days]));
 }
 function total() { return days.size * DAILY; }
+
+function toggleDay(ds) {
+  if (ds > today) return;
+  if (days.has(ds)) days.delete(ds);
+  else days.add(ds);
+  save();
+  render();
+}
 
 function render() {
   const t = total();
@@ -215,7 +227,9 @@ function renderCal() {
     const cls = ['day'];
     if (days.has(ds)) cls.push('done');
     if (ds === today) cls.push('today');
-    html += `<div class="${cls.join(' ')}">${d}</div>`;
+    if (ds < today) cls.push('clickable');
+    if (ds > today) cls.push('future');
+    html += `<div class="${cls.join(' ')}" onclick="toggleDay('${ds}')">${d}</div>`;
   }
   document.getElementById('calendar').innerHTML = html;
 }
@@ -286,17 +300,3 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 </script>
 </body>
 </html>
-
-
-
-          
-          
-
-       
-
-    
-   
-
-
-
-
