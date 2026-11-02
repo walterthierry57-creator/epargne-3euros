@@ -1,19 +1,14 @@
-
 const CACHE = 'epargne-3euros-v2';
-const ASSETS = [
-  './',
-  'index.html',
-  'manifest.webmanifest',
-  'icon.svg',
-  'icon-192.png',
-  'icon-512.png',
-  'icon-maskable-512.png',
-  'apple-touch-icon.png'
-];
+// Indispensables : si l'un manque, l'installation échoue
+const ASSETS = ['./', 'index.html', 'manifest.webmanifest', 'icon.svg'];
+// Facultatifs : ignorés s'ils sont absents du dépôt
+const OPTIONAL = ['icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())
+    caches.open(CACHE)
+      .then(c => c.addAll(ASSETS).then(() => Promise.all(OPTIONAL.map(u => c.add(u).catch(() => {})))))
+      .then(() => self.skipWaiting())
   );
 });
 
