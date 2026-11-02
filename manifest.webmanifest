@@ -1,13 +1,442 @@
-{
-  "name": "Épargne 3 € / jour",
-  "short_name": "Épargne 3€",
-  "description": "Mettre 3 € de côté chaque jour sur toute l'année",
-  "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "#f2f7f4",
-  "theme_color": "#7fb8a4",
-  "lang": "fr",
-  "icons": [
-    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }
-  ]
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7fb8a4">
+<meta name="description" content="Mettre 3 € de côté chaque jour, toute l'année.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Épargne 3€">
+<title>Épargne 3 € / jour</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+  :root {
+    --bg: #f2f7f4;
+    --card: #ffffff;
+    --green: #7fb8a4;
+    --green-dark: #3f7561;
+    --blue: #a9c4d9;
+    --sand: #e8dcc9;
+    --text: #2f4a41;
+    --muted: #55706a;
+    --radius: 18px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: linear-gradient(180deg, #eef5f1 0%, #f6f2ec 100%);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: calc(32px + env(safe-area-inset-bottom));
+  }
+  header {
+    padding: calc(18px + env(safe-area-inset-top)) 20px 10px;
+    text-align: center;
+  }
+  header h1 { font-size: 22px; font-weight: 600; color: var(--green-dark); }
+  header p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  .wrap { max-width: 420px; margin: 0 auto; padding: 0 16px; }
+
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-top: 14px;
+    box-shadow: 0 4px 14px rgba(79, 138, 116, .10);
+  }
+
+  .total-label { font-size: 13px; color: var(--muted); text-align: center; }
+  .total {
+    font-size: 40px; font-weight: 700; text-align: center;
+    color: var(--green-dark); margin-top: 6px;
+  }
+  .sub { font-size: 13px; color: var(--muted); text-align: center; margin-top: 6px; }
+
+  .row { display: flex; justify-content: space-between; padding: 10px 0; font-size: 15px; }
+  .row + .row { border-top: 1px solid #edf3f0; }
+  .row .k { color: var(--muted); }
+  .row .v { font-weight: 600; }
+
+  .btn {
+    display: block; width: 100%; margin-top: 14px;
+    background: var(--green-dark); color: #fff; border: none;
+    border-radius: 14px; padding: 15px; font-size: 16px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+  }
+  .btn:active { background: #2f5a4a; }
+  .btn.ghost { background: transparent; color: var(--green-dark); }
+  .btn.ghost:active { background: #eef4f1; }
+  .btn:disabled { background: var(--sand); color: var(--green-dark); cursor: default; }
+  .btn.ghost:disabled { background: transparent; color: #9db0a9; }
+  button:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+
+  .progress {
+    height: 10px; background: #e7efeb;
+    border-radius: 6px; overflow: hidden; margin-top: 12px;
+  }
+  .progress > div {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--green), var(--blue));
+    border-radius: 6px; transition: width .4s ease;
+  }
+
+  .days {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 6px; margin-top: 12px;
+  }
+  .dow { text-align: center; font-size: 12px; color: var(--muted); font-weight: 600; }
+  .day {
+    aspect-ratio: 1; border-radius: 8px; border: none; background: #eef4f1;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: var(--text); font-family: inherit;
+    padding: 0; margin: 0; width: 100%;
+  }
+  .day.done { background: var(--green-dark); color: #fff; font-weight: 600; }
+  .day.today { outline: 2px solid var(--green-dark); outline-offset: 1px; font-weight: 700; }
+  .day:not(:disabled) { cursor: pointer; }
+  .day:not(:disabled):active { background: var(--sand); }
+  .day.done:not(:disabled):active { background: #2f5a4a; }
+  .day:disabled { opacity: .45; cursor: default; }
+
+  .hint { font-size: 12px; color: var(--muted); text-align: center; margin-top: 10px; }
+
+  .cal-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 12px;
+  }
+  .nav {
+    width: auto; margin: 0; padding: 8px 20px;
+    background: var(--sand); color: var(--text); border: none;
+    border-radius: 10px; font-size: 20px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+  }
+  .nav:disabled { opacity: .35; cursor: default; }
+  .cal-title { font-size: 15px; font-weight: 600; }
+  .center { text-align: center; }
+
+  .history { margin-top: 8px; }
+  .hist-item { display: flex; justify-content: space-between; padding: 9px 0; font-size: 14px; border-bottom: 1px solid #edf3f0; }
+  .empty { text-align: center; color: var(--muted); font-size: 14px; padding: 10px; }
+
+  .warn {
+    display: none; background: #fdecea; color: #8a2b22;
+    border-radius: 12px; padding: 12px 14px; font-size: 13px; margin-top: 14px;
+  }
+
+  footer { text-align: center; font-size: 12px; color: var(--muted); margin-top: 22px; }
+
+  /* Récapitulatif imprimable (PDF) */
+  #printReport { display: none; font-family: Arial, sans-serif; color: #2f4a41; }
+  #printReport h1 { color: #3f7561; font-size: 22px; }
+  #printReport h2 { color: #3f7561; font-size: 16px; margin-top: 22px; }
+  #printReport .big { font-size: 34px; font-weight: bold; color: #3f7561; margin: 10px 0; }
+  #printReport .muted { color: #55706a; font-size: 13px; }
+  #printReport table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  #printReport td, #printReport th { padding: 7px 4px; border-bottom: 1px solid #dde7e2; font-size: 14px; text-align: left; }
+  #printReport th { color: #3f7561; }
+  #printReport .right { text-align: right; }
+
+  @media print {
+    body { background: #fff; padding: 0; min-height: 0; }
+    header, .wrap, footer { display: none !important; }
+    #printReport { display: block; padding: 24px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🌿 Épargne 3 € / jour</h1>
+  <p>3 € chaque jour, toute l'année</p>
+</header>
+
+<div class="wrap">
+
+  <div class="warn" id="warn" role="alert">
+    ⚠️ Impossible d'enregistrer tes données sur cet appareil (stockage plein ou navigation privée).
+    Tes derniers changements risquent d'être perdus.
+  </div>
+
+  <div class="card">
+    <div class="total-label">Total mis de côté cette année</div>
+    <div class="total" id="total" aria-live="polite">0,00 €</div>
+    <div class="sub" id="objective"></div>
+    <div class="progress" id="progress" role="progressbar" aria-label="Progression vers l'objectif annuel"
+         aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="bar"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="row"><span class="k">Jours validés</span><span class="v" id="daysCount">0</span></div>
+    <div class="row"><span class="k" id="goalLabel">Objectif annuel</span><span class="v" id="goalValue"></span></div>
+    <div class="row"><span class="k">Reste à mettre de côté</span><span class="v" id="remain"></span></div>
+    <div class="row"><span class="k">Cette semaine</span><span class="v" id="week">0 €</span></div>
+    <button class="btn" id="addBtn" type="button">+ J'ai mis mes 3 € de côté aujourd'hui</button>
+    <button class="btn ghost" id="undoBtn" type="button">Annuler le dernier jour</button>
+  </div>
+
+  <div class="card">
+    <div class="cal-title center" style="margin-bottom:6px">Calendrier</div>
+    <div class="cal-head">
+      <button class="nav" id="prevMonth" type="button" aria-label="Mois précédent">◀</button>
+      <span class="cal-title" id="monthLabel" aria-live="polite"></span>
+      <button class="nav" id="nextMonth" type="button" aria-label="Mois suivant">▶</button>
+    </div>
+    <div class="days" id="dow" aria-hidden="true"></div>
+    <div class="days" id="calendar"></div>
+    <div class="hint">💡 Touche un jour (aujourd'hui ou passé) pour le cocher ou le décocher</div>
+  </div>
+
+  <div class="card">
+    <div class="cal-title center" style="margin-bottom:4px">Historique</div>
+    <div class="history" id="history"></div>
+    <button class="btn ghost" id="moreBtn" type="button" hidden>Afficher tout l'historique</button>
+    <button class="btn ghost" id="pdfBtn" type="button">📄 Exporter en PDF (année)</button>
+    <button class="btn ghost" id="resetBtn" type="button">Réinitialiser l'année</button>
+  </div>
+
+  <footer>Données enregistrées sur ton téléphone — fonctionne hors ligne</footer>
+</div>
+
+<div id="printReport"></div>
+
+<script>
+'use strict';
+
+const DAILY = 3;
+const HISTORY_LIMIT = 15;
+const YEAR = new Date().getFullYear();
+const IS_LEAP = new Date(YEAR, 1, 29).getMonth() === 1;
+const DAYS_IN_YEAR = IS_LEAP ? 366 : 365;
+const GOAL = DAYS_IN_YEAR * DAILY;
+const DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
+
+const $ = id => document.getElementById(id);
+const fmt = n => n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+const fmt0 = n => n.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) + ' €';
+const iso = d =>
+  d.getFullYear() + '-' +
+  String(d.getMonth() + 1).padStart(2, '0') + '-' +
+  String(d.getDate()).padStart(2, '0');
+const todayISO = () => iso(new Date());
+const fromISO = s => new Date(s + 'T12:00');
+
+/* ---------- Stockage (tolérant aux erreurs) ---------- */
+const keyFor = y => 'epargne-' + y;
+
+function loadYear(y) {
+  try {
+    const raw = JSON.parse(localStorage.getItem(keyFor(y)) || '[]');
+    return Array.isArray(raw)
+      ? raw.filter(s => typeof s === 'string' && DATE_RE.test(s) && !isNaN(fromISO(s)))
+      : [];
+  } catch (e) {
+    return [];
+  }
 }
+
+function saveYear(y, list) {
+  try {
+    localStorage.setItem(keyFor(y), JSON.stringify([...list].sort()));
+    $('warn').style.display = 'none';
+    return true;
+  } catch (e) {
+    $('warn').style.display = 'block';
+    return false;
+  }
+}
+
+/* Charge l'année en cours. Les dates d'une autre année qui s'y seraient glissées
+   (ancien bug du calendrier) sont déplacées vers leur propre année, sans perte. */
+const days = new Set();
+(function init() {
+  const foreign = {};
+  loadYear(YEAR).forEach(d => {
+    const y = Number(d.slice(0, 4));
+    if (y === YEAR) days.add(d);
+    else (foreign[y] = foreign[y] || []).push(d);
+  });
+  const years = Object.keys(foreign);
+  if (years.length) {
+    years.forEach(y => saveYear(Number(y), [...loadYear(Number(y)), ...foreign[y]].filter((v, i, a) => a.indexOf(v) === i)));
+    saveYear(YEAR, days);
+  }
+})();
+
+function save() {
+  saveYear(YEAR, days);
+  // Demande au navigateur de ne pas effacer les données automatiquement
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+}
+
+/* ---------- Actions ---------- */
+let calMonth = new Date().getMonth(); // 0-11, toujours dans l'année en cours
+let showAll = false;
+
+function toggleDay(ds) {
+  if (!DATE_RE.test(ds) || ds > todayISO() || Number(ds.slice(0, 4)) !== YEAR) return;
+  if (days.has(ds)) days.delete(ds);
+  else days.add(ds);
+  save();
+  render();
+}
+
+$('addBtn').onclick = () => {
+  const t = todayISO();
+  if (Number(t.slice(0, 4)) !== YEAR) { location.reload(); return; }
+  days.add(t);
+  save();
+  render();
+};
+
+$('undoBtn').onclick = () => {
+  const last = [...days].sort().pop();
+  if (last) { days.delete(last); save(); render(); }
+};
+
+$('resetBtn').onclick = () => {
+  if (confirm('Effacer tous les jours validés de ' + YEAR + ' ? Cette action est définitive.')) {
+    days.clear(); save(); render();
+  }
+};
+
+$('prevMonth').onclick = () => { if (calMonth > 0) { calMonth--; renderCal(); } };
+$('nextMonth').onclick = () => { if (calMonth < 11) { calMonth++; renderCal(); } };
+
+$('moreBtn').onclick = () => { showAll = true; renderHistory(); };
+
+$('calendar').addEventListener('click', e => {
+  const b = e.target.closest('button[data-date]');
+  if (b && !b.disabled) toggleDay(b.dataset.date);
+});
+
+/* ---------- Affichage ---------- */
+function weekTotal() {
+  const now = new Date();
+  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7));
+  let prev = null;
+  let sum = 0;
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
+    const s = iso(d);
+    if (d.getFullYear() === YEAR) {
+      if (days.has(s)) sum += DAILY;
+    } else if (d.getFullYear() === YEAR - 1) {
+      // Semaine à cheval sur deux années (fin décembre)
+      prev = prev || new Set(loadYear(YEAR - 1));
+      if (prev.has(s)) sum += DAILY;
+    }
+  }
+  return sum;
+}
+
+function render() {
+  const t = days.size * DAILY;
+  const pct = Math.min(100, t / GOAL * 100);
+  $('total').textContent = fmt(t);
+  $('daysCount').textContent = days.size;
+  $('goalLabel').textContent = 'Objectif annuel (' + DAYS_IN_YEAR + ' j)';
+  $('goalValue').textContent = fmt0(GOAL);
+  $('remain').textContent = fmt(Math.max(0, GOAL - t));
+  $('objective').textContent = pct.toFixed(1).replace('.', ',') + ' % de l\'objectif annuel';
+  $('bar').style.width = pct + '%';
+  $('progress').setAttribute('aria-valuenow', Math.round(pct));
+  $('week').textContent = fmt(weekTotal());
+
+  const doneToday = days.has(todayISO());
+  $('addBtn').disabled = doneToday;
+  $('addBtn').textContent = doneToday
+    ? '✓ Jour déjà validé — à toi demain !'
+    : "+ J'ai mis mes 3 € de côté aujourd'hui";
+  $('undoBtn').disabled = days.size === 0;
+
+  renderCal();
+  renderHistory();
+}
+
+function renderCal() {
+  const today = todayISO();
+  $('monthLabel').textContent =
+    new Date(YEAR, calMonth, 1).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  $('prevMonth').disabled = calMonth === 0;
+  $('nextMonth').disabled = calMonth === 11;
+
+  $('dow').innerHTML = ['L', 'M', 'M', 'J', 'V', 'S', 'D'].map(d => `<div class="dow">${d}</div>`).join('');
+
+  const offset = (new Date(YEAR, calMonth, 1).getDay() + 6) % 7;
+  const nb = new Date(YEAR, calMonth + 1, 0).getDate();
+  let html = '';
+  for (let i = 0; i < offset; i++) html += '<div></div>';
+  for (let d = 1; d <= nb; d++) {
+    const date = new Date(YEAR, calMonth, d);
+    const ds = iso(date);
+    const done = days.has(ds);
+    const cls = ['day'];
+    if (done) cls.push('done');
+    if (ds === today) cls.push('today');
+    const label = date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })
+      + (done ? ' — validé' : ' — non validé');
+    html += `<button type="button" class="${cls.join(' ')}" data-date="${ds}" aria-pressed="${done}" aria-label="${label}"${ds > today ? ' disabled' : ''}>${d}</button>`;
+  }
+  $('calendar').innerHTML = html;
+}
+
+function renderHistory() {
+  const all = [...days].sort().reverse();
+  const list = showAll ? all : all.slice(0, HISTORY_LIMIT);
+  $('history').innerHTML = list.length
+    ? list.map(d => `<div class="hist-item"><span>${fromISO(d).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</span><span>${DAILY} €</span></div>`).join('')
+    : '<p class="empty">Aucun jour validé pour le moment.</p>';
+  const more = $('moreBtn');
+  more.hidden = showAll || all.length <= HISTORY_LIMIT;
+  more.textContent = 'Afficher tout l\'historique (' + all.length + ' jours)';
+}
+
+/* ---------- Export PDF (via l'impression du navigateur) ---------- */
+$('pdfBtn').onclick = () => {
+  const t = days.size * DAILY;
+  const counts = new Array(12).fill(0);
+  days.forEach(d => { counts[Number(d.slice(5, 7)) - 1]++; });
+
+  let rows = '';
+  counts.forEach((count, m) => {
+    if (count > 0) {
+      rows += `<tr><td>${new Date(YEAR, m, 1).toLocaleDateString('fr-FR', { month: 'long' })}</td><td>${count} jour${count > 1 ? 's' : ''}</td><td class="right">${fmt(count * DAILY)}</td></tr>`;
+    }
+  });
+  if (!rows) rows = '<tr><td colspan="3" style="text-align:center">Aucun jour validé pour le moment.</td></tr>';
+
+  $('printReport').innerHTML = `
+    <h1>🌿 Épargne ${DAILY} € / jour — ${YEAR}</h1>
+    <p class="muted">Récapitulatif généré le ${new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+    <div class="big">${fmt(t)}</div>
+    <p class="muted">${days.size} jour(s) validé(s) — objectif annuel : ${fmt(GOAL)}</p>
+    <h2>Détail par mois</h2>
+    <table>
+      <tr><th>Mois</th><th>Jours validés</th><th class="right">Montant</th></tr>
+      ${rows}
+      <tr><th>Total ${YEAR}</th><th>${days.size} jours</th><th class="right">${fmt(t)}</th></tr>
+    </table>
+    <h2>Objectif</h2>
+    <p class="muted">${DAILY} € × ${DAYS_IN_YEAR} jours = ${fmt(GOAL)} à la fin de l'année.<br>Reste à mettre de côté : ${fmt(Math.max(0, GOAL - t))}.</p>`;
+  window.print();
+};
+
+/* ---------- Démarrage ---------- */
+render();
+
+// Si l'app reste ouverte après minuit (ou le 31 décembre), on se remet à jour
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  if (new Date().getFullYear() !== YEAR) location.reload();
+  else render();
+});
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
